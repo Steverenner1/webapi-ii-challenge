@@ -41,6 +41,41 @@ router.get('/:id/comments', (req, res) => {
 
 // POST ROUTES
 
+router.post('/', (req, res) => {
+    const contents = req.params.contents;
+    const title = req.params.title;
+
+    if(!title || !contents){
+        res.status(400).json({ err: "Please provide title and contents for the post" })
+    } else {
+        db.insert(req.body)
+            .then(post => {
+                res.status(201).json({post})
+            })
+            .catch(err => {
+                res.status(500).json({ err: "There was an error while saving the post to the database"})
+            })
+    }
+})
+
+router.post('/:id/comments', (req, res) => {
+    const comment = req.body;
+    
+    if(!comment.postID){
+        res.status(404).json({ err: "The post with the specified ID does not exist" })
+    } else if(!comment.text){
+        res.status(400).json({ err: "Please provide text for the comment." })
+    } else if(comment.postID && comment.text){
+        db.insertComment(comment)
+            .then(result => {
+                res.status(201).json(result)
+            })
+            .catch(err => {
+                res.status(500).json({ err: "There was an error while saving the comment to the database"})
+            })
+    }
+});
+
 // DELETE ROUTES
 
 router.delete('/:id', (req, res) => {
@@ -88,8 +123,5 @@ router.put("/:id", (req, res) => {
             });
     }
 });
-
-
-
 
 module.exports = router;
